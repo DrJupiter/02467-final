@@ -11,7 +11,7 @@ with open("./secret/keys.yaml", "r") as keyfile:
 t = twarc.Twarc2(keys['ApiKey'], keys['ApiKeySecret'], keys['AccessToken'], keys['AccessTokenSecret'], bearer_token = keys['BearerToken'])
 
 # %%
-path = './data/dehydrated/2022-02-27_3.csv'
+path = './data/dehydrated/300322_1.csv'
 ids = np.loadtxt(path)
 ids = ids.astype(int)
 

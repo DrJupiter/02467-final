@@ -131,3 +131,4 @@ dmypy.json
 # Added
 /secret/*
 /data/*
+get_loads_of_data.py
