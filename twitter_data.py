@@ -58,7 +58,7 @@ for dir in dirs:
         tweets = t.tweet_lookup(ids)
         data = list(tweets)
         os.makedirs(f'./data/hydrated/{dirname}/')
-        with open(f'./data/hydrated/{dirname}/{file}.json','r') as f:
+        with open(f'./data/hydrated/{dirname}/{file}.json','w') as f:
            data = json.dump(data,f)
 
     
