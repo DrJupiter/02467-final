@@ -10,17 +10,14 @@ with open("./secret/keys.yaml", "r") as keyfile:
 
 t = twarc.Twarc2(keys['ApiKey'], keys['ApiKeySecret'], keys['AccessToken'], keys['AccessTokenSecret'], bearer_token = keys['BearerToken'])
 
+
 # %%
-path = './data/dehydrated/300322_1.csv'
+path = './data/dehydrated/2022-03-09/2022-03-09_1.csv'
 ids = np.loadtxt(path)
-ids = ids.astype(int)
-
-# %%
-
-tweets = t.tweet_lookup(ids)
-
-# %%
+tweets = t.tweet_lookup([id])
 data = list(tweets)
+
+
 
 
 # %%
@@ -41,6 +38,7 @@ with open('./data/0227.json','r') as f:
 
 # %%
 
+
 import os
 path = './data/dehydrated'
 dirs = [os.path.join(path,d) for d in os.listdir(path) if os.path.isdir(os.path.join(path,d))]
@@ -51,14 +49,13 @@ for dir in dirs:
     dirname = os.path.dirname(dir)
     files = [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir,f))] 
     print(files)
-    for file in files:
+    for i,file in enumerate(files):
+        print("don with",i)
         ids = np.loadtxt(os.path.join(dir,file))
-        ids = ids.astype(int)
-        #tweets = t.tweet_lookup(ids)
-        #data = list(tweets)
-        #with open(f'./data/hydrated/{dirname}/{file}.json','r') as f:
-        #    data = json.dump(data,f)
+        # ids = ids.astype(int)
+        tweets = t.tweet_lookup(ids)
+        data = list(tweets)
+        with open(f'./data/hydrated/{dirname}/{file}.json','r') as f:
+           data = json.dump(data,f)
 
     
-
-# %%
