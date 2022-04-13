@@ -3,6 +3,7 @@ import yaml
 import twarc
 from twarc.expansions import EXPANSIONS, USER_FIELDS, TWEET_FIELDS, PLACE_FIELDS, LIST_FIELDS
 import numpy as np
+import json 
 
 # %%
 with open("./secret/keys.yaml", "r") as keyfile:
@@ -21,10 +22,10 @@ data = list(tweets)
 
 
 # %%
-import json 
 
 # save data
 
+# %%
 with open('./data/0227.json', 'w') as f:
     json.dump(f, data) 
 
@@ -49,13 +50,16 @@ for dir in dirs:
     dirname = os.path.dirname(dir)
     files = [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir,f))] 
     print(files)
+    
     for i,file in enumerate(files):
         print("don with",i)
         ids = np.loadtxt(os.path.join(dir,file))
-        # ids = ids.astype(int)
+        #ids = ids.astype(int)
         tweets = t.tweet_lookup(ids)
         data = list(tweets)
+        os.makedirs(f'./data/hydrated/{dirname}/')
         with open(f'./data/hydrated/{dirname}/{file}.json','r') as f:
            data = json.dump(data,f)
 
     
+# %%
