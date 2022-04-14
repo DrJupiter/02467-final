@@ -19,9 +19,18 @@ files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))]
 files.sort(key = lambda x: x[:10])
 
 # %%
+import re
+
+hashtags = r"#[^#\s.,;:'`]+"
+hashtags = re.compile(hashtags)
+#for te in test_string:
+#    print(hashtags.findall(y,te))
+
+# %%
 from collections import defaultdict
 
 topic_count = defaultdict(lambda: 0)
+
 for file in files[:2]:
     with open(path.joinpath(file),'r') as f:
         data = json.load(f)
@@ -36,11 +45,15 @@ for file in files[:2]:
                 # get proper context annotations and text
                 id = tweet['id']
                 tweet = id_ref_tweets[id]
-                pass 
             else:
                 # just continue as planned
                 pass
-            tweet['context_annotations']
+            for dom in tweet['context_annotations']:
+                topic = dom['entity']['name'] 
+                topic_count[topic] += 1
+            for hashtag in hashtags.findall(tweet['text']):
+                topic_count[hashtag] += 1
+            
 
 
 
