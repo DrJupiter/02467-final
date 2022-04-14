@@ -43,5 +43,57 @@ lang_days["2022-03-12"]["uk"]
 
 
 #%%
-import matplotlib.pyplot
+days = list(lang_days.keys())
 
+for day in days:
+    N = sum(lang_days[day].values())
+    lang_days[day]["other_p"] = 0
+    lang_days[day][f"en_p"] = 0
+    lang_days[day][f"uk_p"] = 0
+    lang_days[day][f"ru_p"] = 0
+
+    for lang in lang_days[day]:
+        if lang != "en" and lang != "uk" and lang != "ru":
+            lang_days[day]["other_p"] += lang_days[day][lang]/N
+        else:
+            lang_days[day][f"{lang}_p"] = lang_days[day][lang]/N
+
+#%%
+lang_days["2022-03-12"]["uk_p"]
+
+#%%
+
+x = r"#[\w]+"
+y = r"#[^#\s.,;:'`]+"
+
+test_string = ["#ged","#ged#fisk", "#ged1fisk", "#ged2.fisk", "#ged3? fisk", "#asjdkl#asjdklsiiee ;3 #sdokpwekr3pwoe"]
+
+for te in test_string:
+    print(re.findall(y,te))
+
+
+#%%
+
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(20,10),dpi=400)
+plt.xticks(rotation=90,fontsize=15)
+plt.yticks(fontsize=15)
+
+colors = ["blue","red","green","orange","purple"]
+relevant_langs = ["en_p","uk_p","ru_p","other_p"]
+
+for i, lang in enumerate(relevant_langs):
+
+    dat = [lang_days[day][lang] for day in days]
+
+    ax.plot(days, dat, 'D-', color=colors[i], label = lang)
+    
+
+
+plt.title("daily language distribtion of Tweets",fontdict={'fontsize': 30})
+plt.xlabel("day",fontdict={'fontsize': 30})
+plt.ylabel("% of daily tweets",fontdict={'fontsize': 30})
+plt.legend()
+
+plt.show()
