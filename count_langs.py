@@ -5,8 +5,7 @@ import json
 import os
 
 #%%
-with open('./data/0227.json','r') as f:
-    data = json.load(f)
+
 
 path = './data/hydrated/data/dehydrated'
 
@@ -18,3 +17,8 @@ for filename in os.listdir(path):
     # checking if it is a file
     if os.path.isfile(f):
         print(f)
+        with open(f,'r') as fi:
+            data = json.load(fi)
+
+        pd.DataFrame(data)    
+    break
