@@ -19,8 +19,30 @@ files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))]
 files.sort(key = lambda x: x[:10])
 
 # %%
+from collections import defaultdict
+
+topic_count = defaultdict(lambda: 0)
 for file in files[:2]:
     with open(path.joinpath(file),'r') as f:
         data = json.load(f)
+    for q in range(len(data)):
+        ref_tweets = data[q]['includes']['tweets']
+        id_ref_tweets = {ref_tweets[i]['id']:ref_tweets[i] for i in range(len(ref_tweets))}
+        for t in range(len(data[q]['data'])):
+            # insert hastag function
+            tweet= data[q]['data'][t]
+            type = tweet['referenced_tweets'][0]['type']
+            if type in ['retweeted', 'replied_to']:
+                # get proper context annotations and text
+                id = tweet['id']
+                tweet = id_ref_tweets[id]
+                pass 
+            else:
+                # just continue as planned
+                pass
+            tweet['context_annotations']
+
+
+
     
-    
+# %%
