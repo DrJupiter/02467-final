@@ -12,7 +12,7 @@ from pathlib import Path
 code_path = Path(os.getcwd())
 
 # %%
-path = code_path.joinpath('data/hydrated/data/dehydrated/')
+path = code_path.joinpath('data/hydrated')
 #dirs = [os.path.join(path,d) for d in os.listdir(path) if os.path.isdir(os.path.join(path,d))]
 files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))] 
 # %%
@@ -43,6 +43,8 @@ for file in files[:2]:
             type = tweet['referenced_tweets'][0]['type']
             if type in ['retweeted', 'replied_to']:
                 # get proper context annotations and text
+                print(type)
+                # tweet['referenced_tweets'][0]['id']
                 id = tweet['id']
                 tweet = id_ref_tweets[id]
             else:
