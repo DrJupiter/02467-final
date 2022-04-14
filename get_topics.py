@@ -30,7 +30,8 @@ hashtags = re.compile(hashtags)
 from collections import defaultdict
 
 topic_count = defaultdict(lambda: 0)
-
+no_context = 0
+none_type = 0
 for file in files[:2]:
     with open(path.joinpath(file),'r') as f:
         data = json.load(f)
@@ -40,19 +41,36 @@ for file in files[:2]:
         for t in range(len(data[q]['data'])):
             # insert hastag function
             tweet= data[q]['data'][t]
-            type = tweet['referenced_tweets'][0]['type']
+            
+            type = tweet.get('referenced_tweets')
+            if type is None:
+                none_type += 1
             if type in ['retweeted', 'replied_to']:
                 # get proper context annotations and text
                 print(type)
-                # tweet['referenced_tweets'][0]['id']
-                id = tweet['id']
-                tweet = id_ref_tweets[id]
+                id = tweet['referenced_tweets'][0]['id']
+                # entities
+                #id = tweet['id']
+                _tweet = id_ref_tweets.get(id)
+                if _tweet is not None:
+                    tweet = _tweet
+                else:
+                    if tweet.get('context_annotations') is not None:
+                        pass
+                    else:
+                        for hashtag in hashtags.findall(tweet['text']):
+                            topic_count[hashtag] += 1
+                        continue
             else:
                 # just continue as planned
                 pass
-            for dom in tweet['context_annotations']:
-                topic = dom['entity']['name'] 
-                topic_count[topic] += 1
+            domains = tweet.get('context_annotations')
+            if domains is None:
+                no_context += 1
+            else:
+                for dom in tweet['context_annotations']:
+                    topic = dom['entity']['name'] 
+                    topic_count[topic] += 1
             for hashtag in hashtags.findall(tweet['text']):
                 topic_count[hashtag] += 1
             
