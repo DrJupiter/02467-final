@@ -59,3 +59,20 @@ for file in files[:2]:
 
     
 # %%
+import matplotlib.pyplot as plt
+
+# topic_count = {"fisk":15, "gaffel": 22, "ost": 69,"cola": 4}
+
+fig, ax = plt.subplots(figsize=(15,7),dpi=400)
+plt.xticks(rotation=45,fontsize=15)
+plt.yticks(fontsize=15)
+
+ax.bar(list(topic_count),list(topic_count.values()))
+
+plt.title("Topic occurrences",fontdict={'fontsize': 20})
+plt.xlabel("topic",fontdict={'fontsize': 20})
+plt.ylabel("Number of occurrences (links)",fontdict={'fontsize': 20})
+
+plt.show()
+# %%
+
