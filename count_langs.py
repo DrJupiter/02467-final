@@ -61,15 +61,15 @@ for day in days:
 #%%
 lang_days["2022-03-12"]["uk_p"]
 
-#%%
+# %%
 
-x = r"#[\w]+"
-y = r"#[^#\s.,;:'`]+"
+# x = r"#[\w]+"
+# y = r"#[^#\s.,;:'`]+"
 
-test_string = ["#ged","#ged#fisk", "#ged1fisk", "#ged2.fisk", "#ged3? fisk", "#asjdkl#asjdklsiiee ;3 #sdokpwekr3pwoe"]
+# test_string = ["#ged","#ged#fisk", "#ged1fisk", "#ged2.fisk", "#ged3? fisk", "#asjdkl#asjdklsiiee ;3 #sdokpwekr3pwoe"]
 
-for te in test_string:
-    print(re.findall(y,te))
+# for te in test_string:
+#     print(re.findall(y,te))
 
 
 #%%
@@ -112,3 +112,4 @@ plt.pie(list(N_points_lang.values()),labels=list(N_points_lang), colors=colors, 
 plt.title('Total langugae distribution')
 plt.axis('equal')
 plt.show()
+# %%
