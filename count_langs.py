@@ -1,5 +1,4 @@
 #%%
-from xml.etree.ElementInclude import default_loader
 import pandas as pd
 import numpy as np
 import json
@@ -109,7 +108,6 @@ N_points_lang = defaultdict(int)
 for i, lang in enumerate(relevant_langs):
 
     N_lang = sum([lang_days[day][lang] for day in days])
-    print(N_lang)
     N_points_lang[lang] = N_lang
 
 plt.pie(list(N_points_lang.values()),labels=list(cap_langs), colors=colors, startangle=90, shadow=True,explode=(0.1, 0.1, 0.1, 0.1), autopct='%1.2f%%')
