@@ -45,8 +45,10 @@ lang_days["2022-03-12"]["uk"]
 #%%
 days = list(lang_days.keys())
 
+
 for day in days:
     N = sum(lang_days[day].values())
+    lang_days[day]["other"] = 0
     lang_days[day]["other_p"] = 0
     lang_days[day][f"en_p"] = 0
     lang_days[day][f"uk_p"] = 0
@@ -54,12 +56,13 @@ for day in days:
 
     for lang in lang_days[day]:
         if lang != "en" and lang != "uk" and lang != "ru":
+            lang_days[day]["other"] += lang_days[day][lang]
             lang_days[day]["other_p"] += lang_days[day][lang]/N
         else:
             lang_days[day][f"{lang}_p"] = lang_days[day][lang]/N
 
 #%%
-lang_days["2022-03-12"]["uk_p"]
+lang_days["2022-03-12"]["en_p"]
 
 # %%
 
@@ -100,16 +103,20 @@ plt.legend(prop={'size': 30})
 plt.show()
 
 #%%
-relevant_langs = ["en","uk","ru","other"]
+relevant_langs = ["ru","en","uk","other"]
+cap_langs = ["Russian","English","Ukrainian","Other languages"]
 N_points_lang = defaultdict(int)
 for i, lang in enumerate(relevant_langs):
 
     N_lang = sum([lang_days[day][lang] for day in days])
+    print(N_lang)
     N_points_lang[lang] = N_lang
 
-plt.pie(list(N_points_lang.values()),labels=list(N_points_lang), colors=colors, startangle=90, shadow=True,explode=(0.1, 0.1, 0.1, 0.1), autopct='%1.2f%%')
+plt.pie(list(N_points_lang.values()),labels=list(cap_langs), colors=colors, startangle=90, shadow=True,explode=(0.1, 0.1, 0.1, 0.1), autopct='%1.2f%%')
 
-plt.title('Total langugae distribution')
+plt.title('Total language distribution')
 plt.axis('equal')
 plt.show()
 # %%
+
+sum([lang_days[day]["other_p"] for day in days])
