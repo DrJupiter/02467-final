@@ -14,8 +14,10 @@ code_path = Path(os.getcwd())
 path = code_path.joinpath('./data/complete/')
 dirs = [os.path.join(path,d) for d in os.listdir(path) if os.path.isdir(os.path.join(path,d))]
 
+# REMOVE LATER, BUT RN WE ONLY LOOK AT THE FIRST 20 DAYS
 # %%
 dirs.sort(key = lambda x: x[-10:])
+dirs = dirs[:20]
 
 # %%
 

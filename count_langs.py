@@ -1,29 +1,34 @@
 #%%
-from xml.etree.ElementInclude import default_loader
 import pandas as pd
 import numpy as np
 import json
 import os
 from collections import defaultdict
 import re
+
+# For code path
+import sys
+from pathlib import Path
 #%%
 
 
-path = './data/hydrated/data/dehydrated'
+code_path = Path(os.getcwd())
+path = './data/hydrated/'
 
+path = code_path.joinpath('data/hydrated')
+#dirs = [os.path.join(path,d) for d in os.listdir(path) if os.path.isdir(os.path.join(path,d))]
+files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))] 
+# %%
+files.sort(key = lambda x: x[:10])
+
+# %%
 lang_days = defaultdict(lambda: defaultdict(int))
-
 c = 0
+for file in files:
+    with open(path.joinpath(file),'r') as f:
+        data = json.load(f)
 
-for filename in os.listdir(path):
-    # print("filenam",filename)
-    f = os.path.join(path, filename)
-    # checking if it is a file
-    if os.path.isfile(f):
-        with open(f,'r') as fi:
-            data = json.load(fi)
-
-        day = re.findall(f"[0-9-]+",f)[0]
+        day = re.findall(f"[0-9-]+",file)[0]
         if day not in lang_days:
             lang_days[day] = defaultdict(int)
             print("added day",day)
@@ -35,11 +40,6 @@ for filename in os.listdir(path):
                 lang_days[day][lang] += 1
 
         # print(df.iloc[0]["data"][0]["context_annotations"])
-    
-
-#%%
-
-lang_days["2022-03-12"]["uk"]
 
 
 #%%
@@ -58,18 +58,6 @@ for day in days:
         else:
             lang_days[day][f"{lang}_p"] = lang_days[day][lang]/N
 
-#%%
-lang_days["2022-03-12"]["uk_p"]
-
-#%%
-
-x = r"#[\w]+"
-y = r"#[^#\s.,;:'`]+"
-
-test_string = ["#ged","#ged#fisk", "#ged1fisk", "#ged2.fisk", "#ged3? fisk", "#asjdkl#asjdklsiiee ;3 #sdokpwekr3pwoe"]
-
-for te in test_string:
-    print(re.findall(y,te))
 
 
 #%%
@@ -95,7 +83,7 @@ for i, lang in enumerate(relevant_langs_p):
 plt.title("daily language distribtion of Tweets",fontdict={'fontsize': 30})
 plt.xlabel("day",fontdict={'fontsize': 30})
 plt.ylabel("% of daily tweets",fontdict={'fontsize': 30})
-plt.legend(prop={'size': 30})
+plt.legend(prop={'size': 30}, loc='midlle right')
 
 plt.show()
 
@@ -112,3 +100,4 @@ plt.pie(list(N_points_lang.values()),labels=list(N_points_lang), colors=colors, 
 plt.title('Total langugae distribution')
 plt.axis('equal')
 plt.show()
+# %%
