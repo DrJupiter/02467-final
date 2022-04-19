@@ -52,7 +52,6 @@ for file in files:
             type_dict[type] += 1
             if type in ['retweeted', 'replied_to']:
                 # get proper context annotations and text
-                print(type)
                 if ref_tweets is not None:
 
                     id = tweet['referenced_tweets'][0]['id']
