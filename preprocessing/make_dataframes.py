@@ -93,15 +93,15 @@ for file in files:
             # print(tweet_id)
 
             # Get tweet type
-            type = "original"
+            type_ = "original"
             type_data = tweet.get('referenced_tweets')
 
             if type_data is not None:
-                type = type_data[0]['type']
+                type_ = type_data[0]['type']
                 parent_id = type_data[0]['id']
 
                 # # Special if not original tweet
-                if type in ['retweeted', 'replied_to']:
+                if type_ in ['retweeted', 'replied_to']:
 
                     # get proper context annotations, text and id
                     # if ref_tweets is not None:
@@ -113,27 +113,12 @@ for file in files:
                     if _tweet is not None:
                         reffing_tweet = tweet
                         tweet = _tweet
-
-                        # parent only relevant for these types of tweets
-                        # parent_id = tweet["id"]
-
-                            
-
-
-                        # else:
-                        #     if tweet.get('context_annotations') is None:
-                        #         tweet_text = tweet['text']
-                        #         for hashtag in hashtags.findall(tweet_text):
-                        #             # Hashtags
-                        #             None
-                        #         continue
-
-                                                
+                                         
             ### Start getting values for dataframe
 
             ## Get universal data 2
-            lang = tweet["lang"]
-            text = tweet["text"]
+            lang = tweet["lang"].lower()
+            text = tweet["text"].lower() #ADDED lower (untested)
 
             hashtag_list = []
             mention_list = []
@@ -144,7 +129,7 @@ for file in files:
                 topics = [dom['entity']['name'] for dom in tweet['context_annotations']]
                 topics = set(topics)
                 for topic in topics:
-                    context_anno_domains.append(topic)
+                    context_anno_domains.append(topic.lower())
             
 
             tweet_entities = tweet.get("entities")
@@ -155,13 +140,13 @@ for file in files:
                 if hashtags_ is not None:
                     for hashtag in hashtags_:
                         tag = hashtag["normalized_text"]
-                        hashtag_list.append(tag)
+                        hashtag_list.append(tag.lower())
                     
                 if mentions_ is not None:
                     for mention in mentions_:
                         mention_username = mention["username"]
                         mention_id = mention["id"]
-                        mention_list.append([mention_id,mention_username])
+                        mention_list.append([mention_id.lower(),mention_username.lower()])
 
             essential_tweet_data = {
                                     "tweet_id": tweet_id,
@@ -169,7 +154,7 @@ for file in files:
                                     "parent_id": parent_id,
                                     "lang":lang,
                                     "text":text,
-                                    "tweet_type":type,
+                                    "tweet_type":type_,
                                     "created_time":created_at,
                                     "hashtags":hashtag_list,
                                     "topics":context_anno_domains, 
@@ -177,14 +162,9 @@ for file in files:
                                     # username
                                     }
             df.loc[tweet_id] = essential_tweet_data
-            # print(df)
-            # print("Fisk",tweet_id)
-            # print(len(essential_tweet_data))
-            # df = df.append(essential_tweet_data, ignore_index=True)
-            # print(df)
 
     #save df
-    df.to_pickle(f"{save_path}/{file[:-9]}.pkl")
+    # df.to_pickle(f"{save_path}/{file[:-9]}.pkl") #uncomment to save data
     print("done with file", file[:-9])
 
 #%%
@@ -213,26 +193,65 @@ df.to_pickle(f"{save_path_dates}/{start_date}.pkl")
 
 
 #%%
+def common_member(a, b):
+    a_set = set(a)
+    b_set = set(b)
+    if (a_set & b_set):
+        return True 
+    else:
+        return False
+
+putin_words = ["Putin","Vladimir Putin", "putin","vladimir putin"] # dublicate words should be removed when the data is gernereated again, as all will be lower then
+zelen_words = ["Volodymyr","Volodymyr Zelenskyy","Zelenskyy","volodymyr zelenskyy","volodymyr","zelenskyy"]
 
 def get_president_data(dataframe):
     
-    topics = dataframe["topics"]+dataframe["hashtags"]
-    
+    topics = dataframe["topics"] + dataframe["hashtags"]
+
     putin_list, zelensky_list = [], []
     
-    if "putin" in topics:
-        putin_list.append(dataframe["tweet_id"])
-    if "Volodymyr Zelenskyy" in topics:
-        zelensky_list.append(dataframe["tweet_id"])
-        
+    for tweet_topics in topics:        
+
+        if common_member(tweet_topics,putin_words):
+            putin_list.append(dataframe["tweet_id"])
+
+        if common_member(tweet_topics,zelen_words):
+            zelensky_list.append(dataframe["tweet_id"])
 
     return putin_list, zelensky_list
+
+l1, l2 = get_president_data(df)
+len(l1), len(l2)
+
+#%%
+dataframes_files_dates = [f for f in os.listdir(save_path_dates) if os.path.isfile(os.path.join(save_path_dates,f))] 
+
+tweeted_putin_id_list, tweeted_zelen_id_list = [], []
+for df_name in dataframes_files_dates:
+    df = pd.read_pickle(f"{save_path_dates}/{df_name}")
+    putin_list, zelen_list = get_president_data(df)  
+    tweeted_putin_id_list += putin_list
+    tweeted_zelen_id_list += zelen_list
+
+len(tweeted_putin_id_list), len(tweeted_zelen_id_list)
+
+
+#%%
+MASSIVE_LIST = []
+for df_name in dataframes_files_dates:
+    df = pd.read_pickle(f"{save_path_dates}/{df_name}")
+    MASSIVE_LIST.append(df)
+    
+THE_GREAT_DF = pd.concat(MASSIVE_LIST)
+
+
 
 #%%
 dataframe = "03-08.pkl"
 df = pd.read_pickle(f"{save_path_dates}/{dataframe}")  
-get_president_data(dataframe)
+
 # df.to_pickle(f"{save_path_dates}/{dataframe[:-9]}.pkl")
-df
+# df
+
 #%%
 

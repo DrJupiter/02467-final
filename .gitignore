@@ -134,3 +134,4 @@ dmypy.json
 get_loads_of_data.py
 *.csv
 preprocessing/data.pkl
+preprocessing/THE_ONE_DF.pkl
