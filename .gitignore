@@ -133,3 +133,4 @@ dmypy.json
 /data/*
 get_loads_of_data.py
 *.csv
+preprocessing/data.pkl
