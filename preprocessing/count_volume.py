@@ -1,7 +1,7 @@
 # %%
 import numpy as np
 import os
-
+from count_dehydrated import dehydrated
 
 # For code path
 import sys
@@ -33,6 +33,11 @@ for dir in dirs:
 # %%
 for key in volume_count.keys():
     volume_count[key] = sum(volume_count[key])
+
+# %%
+
+total = dehydrated(path)
+
 # %%
 import matplotlib.pyplot as plt
 fig, ax = plt.subplots(figsize=(20,10),dpi=400)
