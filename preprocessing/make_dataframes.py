@@ -202,7 +202,7 @@ def common_member(a, b):
         return False
 
 putin_words = ["Putin","Vladimir Putin", "putin","vladimir putin"] # dublicate words should be removed when the data is gernereated again, as all will be lower then
-zelen_words = ["Volodymyr","Volodymyr Zelenskyy","Zelenskyy","volodymyr zelenskyy","volodymyr","zelenskyy"]
+zelen_words = ["Volodymyr","Volodymyr Zelenskyy","Zelenskyy","volodymyr zelenskyy","volodymyr","zelenskyy","ZelenskyyUa","Volodymyr Zelensky","Zelensky","zelensky"]
 
 def get_president_data(dataframe):
     
@@ -233,8 +233,9 @@ for df_name in dataframes_files_dates:
     tweeted_putin_id_list += putin_list
     tweeted_zelen_id_list += zelen_list
 
-len(tweeted_putin_id_list), len(tweeted_zelen_id_list)
+#%%
 
+len(tweeted_putin_id_list), len(tweeted_zelen_id_list)
 
 #%%
 MASSIVE_LIST = []
@@ -243,15 +244,10 @@ for df_name in dataframes_files_dates:
     MASSIVE_LIST.append(df)
     
 THE_GREAT_DF = pd.concat(MASSIVE_LIST)
-
-
+# df.to_pickle(f"THE_ONE_DF.pkl")
 
 #%%
 dataframe = "03-08.pkl"
 df = pd.read_pickle(f"{save_path_dates}/{dataframe}")  
 
-# df.to_pickle(f"{save_path_dates}/{dataframe[:-9]}.pkl")
-# df
-
-#%%
 
