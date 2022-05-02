@@ -8,7 +8,7 @@ from pathlib import Path
 code_path = Path(os.getcwd())
 path = code_path.joinpath('./data/complete/')
 
-def count_dehydrated(path):
+def dehydrated(path):
 
     subfolders = [ f.path for f in os.scandir(path) if f.is_dir() ]
 
