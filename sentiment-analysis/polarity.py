@@ -17,7 +17,7 @@ en_df = df.iloc[en_idx]
 sentiment = analyzer.polarity_scores(en_df['text'][0])
 
 # %% find translation
-
+# pip install googletrans==4.0.0rc1  
 
 translator.translate('안녕하세요.')
 # <Translated src=ko dest=en text=Good evening. pronunciation=Good evening.>
