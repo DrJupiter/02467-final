@@ -8,6 +8,7 @@ from googletrans import Translator
 
 translator = Translator()
 analyzer = SentimentIntensityAnalyzer()
+#%%
 df = pd.read_pickle('/home/klaus/Desktop/DTU Semester 4/DTU-SocialScience/02467-final/data/dataframes/02-27.pkl')
 # %%
 en_idx = (df['lang'] == 'en').to_numpy()
