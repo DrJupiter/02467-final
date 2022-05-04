@@ -13,13 +13,11 @@ from collections import defaultdict
 import sys
 from pathlib import Path
 
-from sympy import topological_sort
-
 # This is used to read files in the module properly when the Main.py script is run from an external location.
 #code_path = Path(*Path(os.path.realpath(sys.argv[0])).parts[:-1])
 code_path = Path(os.getcwd())
 
-##%%
+#%%
 
 
 path = code_path.joinpath('./../data/hydrated')
@@ -251,3 +249,35 @@ dataframe = "03-08.pkl"
 df = pd.read_pickle(f"{save_path_dates}/{dataframe}")  
 
 
+#%%
+### MAKE USER DATAFRAME
+save_path_dates = code_path.joinpath('./../data/dataframes_dates')
+dataframes_files_dates = [f for f in os.listdir(save_path_dates) if os.path.isfile(os.path.join(save_path_dates,f))] 
+
+#%%
+
+user_dict = defaultdict(lambda : defaultdict(list))
+
+for df_name in dataframes_files_dates:
+    df = pd.read_pickle(f"{save_path_dates}/{df_name}")
+    # print(df)
+    for i,tweet in enumerate(df.values):
+        essential_tweet_data = {
+                        "tweet_ids": [tweet[0]],
+                        "parent_ids": [tweet[2]],
+                        "langs":[tweet[3]],
+                        "texts":[tweet[4]],
+                        "tweet_types":[tweet[5]],
+                        "created_times":[tweet[6]],
+                        "hashtags":[tweet[7]],
+                        "topics":[tweet[8]], 
+                        "mentions":[tweet[9]],
+                        }
+        for index in essential_tweet_data:
+            user_dict[tweet[1]][index] += essential_tweet_data[index]
+#%%
+user_df = pd.DataFrame.from_dict(user_dict,orient="index")
+#%%
+len(user_df)
+
+user_df.to_pickle(f"user_df.pkl")
