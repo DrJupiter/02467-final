@@ -18,7 +18,7 @@ from pathlib import Path
 #code_path = Path(*Path(os.path.realpath(sys.argv[0])).parts[:-1])
 code_path = Path(os.getcwd())
 
-##%%
+## %%
 
 
 path = code_path.joinpath('./../data/hydrated')
@@ -306,7 +306,7 @@ from googletrans import Translator
 from emoji_translate.emoji_translate import Translator as emoji_trans
 from nltk.tokenize import word_tokenize
 
-from time import perf_counter
+#from time import perf_counter
 
 translator = Translator()
 
