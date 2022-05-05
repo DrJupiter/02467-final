@@ -46,8 +46,6 @@ total = dehydrated(path)
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib as mpl
-import matplotlib.pylab as plt
-import matplotlib.dates as mdates
 import seaborn as sns
 
 def setup_plot():
@@ -61,16 +59,8 @@ def setup_plot():
     myFmt = mdates.DateFormatter('%b %d')    
     print("Plot settings applied")
 
-
-
 setup_plot()
 
-#fig, ax = plt.subplots(figsize=(20,10),dpi=400)
-#plt.xticks(rotation=90,fontsize=15)
-#plt.yticks(fontsize=15)
-#ax.set_ylim(0*50e3,30e4)
-#ax.plot(*zip(*volume_count.items()), '-o', color='purple')
-#plt.title("Volume of tweets surrounding the Russia-Ukraine War",fontdict={'fontsize': 20})
 # %%
 #Converting to dataframe in order to plot xaxis with dateformatting
 
@@ -78,14 +68,8 @@ df = pd.DataFrame.from_dict(volume_count, orient = 'index')
 df.index = pd.to_datetime(df.index)
 
 #%%
-#%%
 fig, ax = plt.subplots(figsize=(15,3),dpi=400, constrained_layout = False)
-
-#ax.plot(*zip(*volume_count.items()), '-o', label = 'Tweets pr. day', ls = "--", alpha = 0.5)
-
 ax.plot(df.index,df.values, '-o', label = 'Tweets pr. day', ls = "--", alpha = 0.5)
-
-
 
 plt.xticks(fontsize = 15)
 ax.set_ylim(18e4,32e4)

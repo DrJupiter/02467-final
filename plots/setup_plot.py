@@ -14,7 +14,7 @@ def setup_plot():
     #mpl.rcParams['axes.titleweight'] = 'bold'
     #mpl.rcParams['axes.titlesize'] = '90'
     
-    sns.set_theme(style="white", palette='pastel', font = 'Arial', font_scale=1.5)
+    sns.set_theme(style="white", palette='pastel', font = 'Arial', font_scale=3)
 
     #sns.set_theme(style="white", palette='pastel', font = 'Microsoft Sans Serif', font_scale=1)
     #myFmt = mdates.DateFormatter('%b #Y')
