@@ -135,3 +135,6 @@ get_loads_of_data.py
 *.csv
 preprocessing/data.pkl
 preprocessing/THE_ONE_DF.pkl
+preprocessing/user_df.pkl
+preprocessing/only_ru_uk_data
+preprocessing/THE_GREAT_DF.pkl
