@@ -7,7 +7,8 @@ from nltk.text import Text
 from nltk.tokenize import word_tokenize
 
 s_analyzer = SentimentIntensityAnalyzer()
-df_uk_ru = pd.read_pickle("only_ru_uk_data.pkl")
+df_uk_ru = pd.read_pickle("./dfs/translated-text-ru-uk.pkl")
+
 
 #%%
 
@@ -76,4 +77,4 @@ for i,en_text in enumerate(df_uk_ru["en_text"]):
 df_uk_ru["sentiment_dict"] = wordwise_sentiment_list
 
 #%%
-df_uk_ru
+df_uk_ru.to_pickle("./dfs/translated-text-ru-uk_sentiment.pkl")
