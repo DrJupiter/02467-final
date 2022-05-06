@@ -529,3 +529,18 @@ user_tt_ru_uk_s
 #%%
 
 #%%
+
+df_ru_uk = pd.read_pickle("./dfs/translated-text-ru-uk_sentiment_n.pkl")
+
+#%%
+
+for semantic,text,id in zip(df_ru_uk["sentiment_dict"],df_ru_uk["en_text"],df_ru_uk.index):
+    if semantic is None:
+        continue
+    if semantic["ukraine"]["compound"] < 0:
+        print("-",id, semantic["ukraine"]["compound"] ,text)
+
+
+#%%
+
+df_ru_uk.loc["1497848944226828288"]["en_text"]

@@ -1,5 +1,6 @@
 #%%
 from itertools import count
+from tokenize import group
 import pandas as pd
 import pickle
 import numpy as np
@@ -31,7 +32,8 @@ for tweed_ids in user_df["tweet_ids"]:
 sum(N_tweets_p_person)
 
 #%%
-
+user_df
+#%%
 
 re_quote = r"\'(.*?)\'"
 
@@ -90,7 +92,7 @@ def get_graph_info(dG):
 
     print(f"top 5 in degree: {max_in_degree}\ntop 5 out degree: {max_out_degree}")
 
-get_graph_info(dG_small)
+get_graph_info(dG_big)
 
 #%%
 # x_i = np.array(dG.in_degree)[:,1].reshape(-1,1)
@@ -208,7 +210,7 @@ def modularity_tests(dG, N = 10000):
     ax.set_xlabel("Modularity")
     print(f"Modularity for random nets: {rand_modul_mean} pm {rand_modul_std}")
 
-modularity_tests(dG_small,N=10000)
+modularity_tests(dG_small,N=1000)
 #%%
 
 
@@ -228,6 +230,133 @@ def get_louvain_graph(dG, visualize = False):
     if visualize:
         nw.visualize(uG_lou)
 
-    return uG_lou
+    return uG_lou, lou_partition
 
-ug_small_lou = get_louvain_graph(dG_small, visualize = False)
+ug_small_lou, lou_partition = get_louvain_graph(dG_small, visualize = False)
+
+#%%
+def lou_modul(uG, N= 1000, groups = lou_partition):
+
+    lou_groups = defaultdict(list)
+
+    for id,g in zip(lou_partition,lou_partition.values()):
+        lou_groups[g] += [id]
+
+    real_lou_groups = []
+    for i in range(len(lou_groups)):
+        real_lou_groups.append(lou_groups[i])
+
+
+    real_modularity = nx.community.modularity(uG,real_lou_groups)
+
+    random_modularities = []
+    for _ in range(N):
+        g = nx.double_edge_swap(uG)
+        random_modularities.append(nx.community.modularity(g,real_lou_groups))
+
+    rand_modul_mean = np.mean(random_modularities)
+    rand_modul_std = np.std(random_modularities)
+
+    # fig,ax = plt.subplots()
+    ax = sns.histplot(random_modularities,kde=True)
+    ax.axvline(real_modularity,color="black",label="True modularity")
+
+    ax.legend()
+    ax.set_title("Modularity of random network (double swap algorithm)")
+    ax.set_ylabel("Number of networks with the given modularity")
+    ax.set_xlabel("Modularity")
+    print(f"Modularity for random nets: {rand_modul_mean} pm {rand_modul_std}")
+
+lou_modul(ug_small_lou, N= 1000, groups = lou_partition)
+#%%
+
+#%%
+#%%
+
+def recursive_next_node(uG, node, parent_node, value_dict, c=1):
+
+    if c == 0:
+        return value_dict[node]
+
+    proxy_val = 0
+    for edge in uG.edges(node):
+
+        if edge[1] == parent_node:
+            continue
+
+        elif edge[1] == node:
+            proxy_val += value_dict[node]
+            continue
+
+        proxy_val += recursive_next_node(uG, edge[1], edge[0], value_dict = value_dict, c=c-1)
+
+    return proxy_val
+
+def n_steps_value(uG, origin_node, c = 2):
+    
+    # ["grey","red","blue","black","lightgray"]
+    colour_scores = [0,-1,1,0,0]
+    value_dict = {}
+    for i,list in enumerate(groups):
+        for node in list:
+            value_dict[node] = colour_scores[i]
+
+    sign = value_dict[origin_node]
+
+    return sign * recursive_next_node(uG, origin_node, 0, value_dict = value_dict, c=c)
+
+#%%
+graph = dG_small
+uG = graph.to_undirected(reciprocal = False)
+_,_,_,_, groups = get_degree_group_info(graph)
+
+# ["grey","red","blue","black","lightgray"]
+ru_gang = groups[2]
+uk_gang = groups[1]
+gangs = [ru_gang,uk_gang]
+adj_values_dict = [{},{}]
+for i,gang in enumerate(gangs):
+    for node in gang:
+        adj_values_dict[i][node] = n_steps_value(uG, node, c = 2) * 0.5
+        adj_values_dict[i][node] = n_steps_value(uG, node, c = 1)
+
+# adj_values_dict
+
+#%%
+adj_values_dict[0][3281902375] # should be pos
+#%%
+adj_values_dict[1][19500405] # should be pos
+#%%
+adj_values_dict[0][2393393520] # should be pos
+
+
+#%%
+x_i, x_o ,x_c, x_g, groups = get_degree_group_info(dG_big)
+
+#%%
+uk = [[],[],[]]
+ru = [[],[],[]]
+
+groups_cut = groups[1:4]
+
+for i,lis in enumerate(groups_cut):
+    for id in lis:
+        nat = user_df.loc[str(id)]["nationality"][0]
+
+        if nat == "ru":
+            ru[i].append(id)
+
+        elif nat == "uk":
+            uk[i].append(id)
+        else:
+            print(nat)
+
+
+#%%
+for lis in uk:
+    print(len(lis))
+
+print("  ")
+
+for lis in ru:
+    print(len(lis))
