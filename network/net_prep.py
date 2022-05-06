@@ -111,22 +111,6 @@ len(dG.edges())
 
 #%%
 
-
-# uG = G.to_undirected(reciprocal = False)
-
-
-
-
-# #%%
-# # check if it hsa the correct sum
-# sum(N_tweets_p_person) == sum(sum(sum(adjacency_matrix)))/2
-
-# #%%
-# plt.imshow(np.sum(adjacency_matrix,axis=2), cmap='hot', interpolation='nearest')
-# plt.show()
-
-#%%
-
 ## GET for directed
 
 # total number of edges
@@ -139,28 +123,39 @@ len(dG.edges())
 # List most popular useres (in degree)
 # in vs out degree for all users
 
-# tG = nx.DiGraph()
-# edges = [(1,2,1),(2,3,2),(3,1,3),(1,1,2)]
-# tG.add_weighted_edges_from(edges)
+M = nx.adjacency_matrix(dG).todense()
 
+fig,ax = plt.subplots(figsize = (10,10))
+ax.imshow(M, cmap='hot', interpolation='nearest')
+plt.title("Adjacency matric heatmap", fontsize = 22)
+plt.xlabel("user number")
+plt.ylabel("user number")
 
-M = nx.adjacency_matrix(G).todense()
+N_edges = len(dG.edges)
+N_nodes = len(dG.nodes)
 
-plt.imshow(M, cmap='hot', interpolation='nearest')
+print(f"N nodes: {N_nodes}\nN_edges: {N_edges}")
 
-N_edges = len(G.edges)
-N_nodes = len(G.nodes)
+dG_dens = nx.density(dG)
 
-G_dens = nx.density(G)
+print(f"Graph density: {dG_dens}")
 
-avg_in_degree = np.mean(list(dict(G.in_degree()).values()))
-avg_out_degree = np.mean(list(dict(G.out_degree()).values()))
+avg_in_degree = np.mean(list(dict(dG.in_degree()).values()))
+avg_out_degree = np.mean(list(dict(dG.out_degree()).values()))
 
-median_in_degree = np.median(list(dict(G.in_degree()).values()))
-median_out_degree = np.median(list(dict(G.out_degree()).values()))
+print(f"avg in degree: {avg_in_degree}\navg out degree: {avg_out_degree}")
 
-print(G_dens)
+median_in_degree = np.median(list(dict(dG.in_degree()).values()))
+median_out_degree = np.median(list(dict(dG.out_degree()).values()))
 
+print(f"median in degree: {median_in_degree}\nmedian out degree: {median_out_degree}")
+
+max_in_degree = sorted(list(dict(dG.in_degree()).values()))[-5:]
+max_out_degree = sorted(list(dict(dG.out_degree()).values()))[-5:]
+
+print(f"top 5 in degree: {max_in_degree}\ntop 5 out degree: {max_out_degree}")
+
+#%%
 #%%
 
 ## GET for undirected
@@ -169,10 +164,14 @@ print(G_dens)
 # total number of nodes
 
 # density of network
-# modualrity of network
-
+#%%
 
 ## Visualize network
+
+nw.visualize(dG)
+
+
+#%%
 
 ## Random network analysis
 
