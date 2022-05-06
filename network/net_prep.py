@@ -319,8 +319,33 @@ for i,gang in enumerate(gangs):
     for node in gang:
         adj_values_dict[i][node] = n_steps_value(uG, node, c = 2) * 0.5
         adj_values_dict[i][node] = n_steps_value(uG, node, c = 1)
+#%%
 
-# adj_values_dict
+adj_values_dict[1]
+
+#%%
+
+import seaborn as sns
+sns.set_theme(style="white", palette='pastel', font = 'Arial', font_scale=1)
+
+fig,ax = plt.subplots(figsize=(10,10))
+
+uk_sum = sum(adj_values_dict[1].values())
+uk_mean = np.mean(list(adj_values_dict[1].values()))
+uk_std = np.std(list(adj_values_dict[1].values()))
+
+ru_sum = sum(adj_values_dict[0].values())
+ru_mean = np.mean(list(adj_values_dict[0].values()))
+ru_std = np.std(list(adj_values_dict[0].values()))
+ax.set_title("Agreement within connections once removed",fontsize = 22)
+ax.set_ylabel("Degree of agreement",fontsize = 22)
+
+plt.bar(["Russia support","Ukrain support"],[ru_sum,uk_sum])
+ax.errorbar(["Russia support","Ukrain support"],[ru_sum,uk_sum],yerr = [ru_std,uk_std],fmt="o", color="black")
+
+#%%
+np.mean(list(adj_values_dict[1].values()))
+
 
 #%%
 adj_values_dict[0][3281902375] # should be pos
@@ -360,3 +385,4 @@ print("  ")
 
 for lis in ru:
     print(len(lis))
+
