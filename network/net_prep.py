@@ -17,21 +17,6 @@ from collections import defaultdict
 user_df = pd.read_pickle("./../preprocessing/dfs/user_trans_senti_ru_uk.pkl")
 
 #%%
-user_df["president"]
-#%%
-user_df.loc["2522682982"]
-
-
-# #%%
-# def common_member(a, b):
-#     a_set = set(a)
-#     b_set = set(b)
-#     if (a_set & b_set):
-#         return True 
-#     else:
-#         return False
-
-#%%
 N_tweets_p_person = []
 for tweed_ids in user_df["tweet_ids"]:
     lis = []
@@ -43,16 +28,6 @@ for tweed_ids in user_df["tweet_ids"]:
 sum(N_tweets_p_person)
 
 #%%
-# fig,ax = plt.subplots()
-# ax.hist(N_tweets_p_person)
-# ax.set_yscale("log")
-#%%
-# user_df.where(user_df.index == 1498643025475649540)
-
-#%%
-# user_df["user_i"] = list(np.arange(len(user_df)))
-# N= len(user_df.index)
-# adjacency_matrix = np.zeros((N,N,2))
 
 dG = nx.DiGraph()
 
@@ -178,6 +153,9 @@ nw.visualize(dG)
 # Create random networks, to see if stuff changes
 # compare degree distribution to real network
 # compare clustering to real network
+
+
+#%%
 
 ## Modularity
 
