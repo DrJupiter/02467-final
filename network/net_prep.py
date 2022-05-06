@@ -17,23 +17,25 @@ from collections import defaultdict
 user_df = pd.read_pickle("./../preprocessing/dfs/user_trans_senti_ru_uk.pkl")
 
 #%%
-1281277547251142657 in user_df.index
-
+user_df["president"]
 #%%
-def common_member(a, b):
-    a_set = set(a)
-    b_set = set(b)
-    if (a_set & b_set):
-        return True 
-    else:
-        return False
+user_df.loc["2522682982"]
+
+
+# #%%
+# def common_member(a, b):
+#     a_set = set(a)
+#     b_set = set(b)
+#     if (a_set & b_set):
+#         return True 
+#     else:
+#         return False
 
 #%%
 N_tweets_p_person = []
 for tweed_ids in user_df["tweet_ids"]:
     lis = []
     for id in tweed_ids:
-        print(id)
         if id is not None:
             lis.append(id)
     N_tweets_p_person.append(len(lis))
@@ -52,7 +54,7 @@ sum(N_tweets_p_person)
 # N= len(user_df.index)
 # adjacency_matrix = np.zeros((N,N,2))
 
-G = nx.DiGraph()
+dG = nx.DiGraph()
 
 re_quote = r"\'(.*?)\'"
 
@@ -71,26 +73,21 @@ for i,(user_id,parents,mentions) in enumerate(zip(user_df.index,user_df["parent_
            ids.append(int(par))
 
     for ment in mentions:
-        mention_list = re.findall(re_quote,ment)
-        if mention_list != []:
-            ids += [int(m) for m in mention_list[::2]]
+        if ment != []:
+            ids += [int(m[0]) for m in ment]
+            # print(i,[int(m[0]) for m in ment])
         # print(m[::2])
 
     # print(ids)
     ll += len(set(ids))
     for target_id in set(ids):
-        # print(target_id)
-        if target_id in user_df.index:
-            if target_id == 393190461:
-                f = 22
-                ged = True
-            edges[(user_id,target_id)] += 1
-            if user_id == target_id:
-                print(user_id,target_id)
+        if str(target_id) in user_df.index:
+            edges[(int(user_id),target_id)] += 1
+            if int(user_id) == target_id:
+                # print(user_id,target_id)
                 c+= 1
             cc += 1
-            if ged == True:
-                f = 33
+
 
 
 
@@ -100,18 +97,21 @@ print("c",c)
 print("cc",cc)
 #%%
 
-user_df.loc[393190461]
-edges[(393190461,1497838731314843650)]
-#%%
-type(int(user_df.iloc[0,1][0]))
-# type(user_df.iloc[0,0][0])
+dG.add_edges_from(list(edges))
 
+#%%
+# nw.visualize(dG)
+len(dG.edges())
+# uG = G.to_undirected(reciprocal = True)
+# len(uG.edges())
 
 #%%
 
 # laver graf mellem alle der har komminikation mellem hinanden
 
-uG = G.to_undirected(reciprocal = True)
+#%%
+
+
 # uG = G.to_undirected(reciprocal = False)
 
 
@@ -139,27 +139,27 @@ uG = G.to_undirected(reciprocal = True)
 # List most popular useres (in degree)
 # in vs out degree for all users
 
-tG = nx.DiGraph()
-edges = [(1,2,1),(2,3,2),(3,1,3),(1,1,2)]
-tG.add_weighted_edges_from(edges)
+# tG = nx.DiGraph()
+# edges = [(1,2,1),(2,3,2),(3,1,3),(1,1,2)]
+# tG.add_weighted_edges_from(edges)
 
 
-# M = nx.adjacency_matrix(G).todense()
+M = nx.adjacency_matrix(G).todense()
 
-# plt.imshow(M, cmap='hot', interpolation='nearest')
+plt.imshow(M, cmap='hot', interpolation='nearest')
 
-# N_edges = len(G.edges)
-# N_nodes = len(G.nodes)
+N_edges = len(G.edges)
+N_nodes = len(G.nodes)
 
-# G_dens = nx.density(G)
+G_dens = nx.density(G)
 
-# avg_in_degree = np.mean(list(dict(G.in_degree()).values()))
-# avg_out_degree = np.mean(list(dict(G.out_degree()).values()))
+avg_in_degree = np.mean(list(dict(G.in_degree()).values()))
+avg_out_degree = np.mean(list(dict(G.out_degree()).values()))
 
-# median_in_degree = np.median(list(dict(G.in_degree()).values()))
-# median_out_degree = np.median(list(dict(G.out_degree()).values()))
+median_in_degree = np.median(list(dict(G.in_degree()).values()))
+median_out_degree = np.median(list(dict(G.out_degree()).values()))
 
-
+print(G_dens)
 
 #%%
 
@@ -193,3 +193,37 @@ tG.add_weighted_edges_from(edges)
 # compare modularity osv with actal graph
 
 # confusion matrix??
+
+
+#%%
+from googletrans import Translator
+translator = Translator()
+
+txt ="Согласен, и ещё лучше чем БМ-13 «Катюша»! Только не понял к чему это))"
+
+translator.translate(txt).text
+
+#%%
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import pandas as pd
+from googletrans import Translator
+from emoji_translate.emoji_translate import Translator as emoji_trans
+from nltk.tokenize import word_tokenize
+
+from time import perf_counter
+
+translator = Translator()
+
+analyzer = SentimentIntensityAnalyzer()
+emo = emoji_trans(exact_match_only=False, randomize=True)
+
+#%%
+re_web_finder = r"(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+"
+for r in re.findall(re_web_finder,txt):
+        txt = txt.replace(r,".")
+#%%
+txt_no_emos = emo.demojify(txt)
+txt_trans = translator.translate(txt_no_emos).text
+txt_trans = word_tokenize(txt_trans)
+txt_final = " ".join(map(str,txt_trans)).lower()
+txt_final 
