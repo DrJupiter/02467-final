@@ -36,19 +36,21 @@ files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))]
 for file in files:
 
     # Create new dataframe
-    df = pd.DataFrame(columns=[
-        "tweet_id",
-        "user_id",
-        "parent_id",
-        "lang",
-        "text",
-        "tweet_type",
-        "created_time",
-        "hashtags",
-        "topics",
-        "mentions",
-        # "username"
-        ])
+    # df = pd.DataFrame(columns=[
+    #     "tweet_id",
+    #     "user_id",
+    #     "parent_id",
+    #     "lang",
+    #     "text",
+    #     "tweet_type",
+    #     "created_time",
+    #     "hashtags",
+    #     "topics",
+    #     "mentions",
+    #     # "username"
+    #     ])
+
+    df = {}
 
     # load data
     with open(path.joinpath(file),'r') as f:
@@ -78,7 +80,7 @@ for file in files:
             user_id = tweet["author_id"]
             created_at = tweet["created_at"]
             parent_id = None
-            
+
             # print(tweet_id)
 
             # Get tweet type
@@ -90,7 +92,7 @@ for file in files:
                 parent_id = type_data[0]['id']
 
                 # # Special if not original tweet
-                if type_ in ['retweeted', 'replied_to']:
+                if type_ in ['retweeted']:
 
                     # get proper context annotations, text and id
                     # if ref_tweets is not None:
@@ -150,17 +152,21 @@ for file in files:
                                     "mentions":mention_list,
                                     # username
                                     }
-            df.loc[tweet_id] = essential_tweet_data
+            df[tweet_id] = essential_tweet_data
 
     #save df
-    df.to_pickle(f"{save_path}/{file[:-9]}.pkl") #uncomment to save data
+    new_df = pd.DataFrame.from_dict(df,orient="index")
+    new_df.to_pickle(f"{save_path}/{file[:-9]}.pkl") #uncomment to save data
     print("done with file", file[:-9])
+    # break
 
 #%%
+new_df.loc["1497841013703987200"]
 
+#%%
 ##############################################################################################
 ##############################################################################################
-
+#%%
 ### Create df's by date
 
 # Concat by date and save to data/dataframes_dates
@@ -199,12 +205,36 @@ for df_name in dataframes_files_dates:
     MASSIVE_LIST.append(df)
     
 THE_GREAT_DF = pd.concat(MASSIVE_LIST)
-# THE_GREAT_DF.to_pickle(f"THE_ONE_DF.pkl")
-
+THE_GREAT_DF.to_pickle(f"THE_ONE_DF.pkl")
 
 #%%
 
+user_dict = defaultdict(lambda : defaultdict(list))
 
+for i,tweet in enumerate(THE_GREAT_DF.values):
+    essential_tweet_data = {
+                    "tweet_ids": [tweet[0]],
+                    "parent_ids": [tweet[2]],
+                    "langs":[tweet[3]],
+                    "texts":[tweet[4]],
+                    "tweet_types":[tweet[5]],
+                    "created_times":[tweet[6]],
+                    "hashtags":[tweet[7]],
+                    "topics":[tweet[8]], 
+                    "mentions":[tweet[9]],
+                    # "en_text":[tweet[11]],
+                    # "overall_sentiement":[tweet[12]],
+                    # "president": [tweet[13]],
+                    # "word_wise_sentiement":[tweet[14]],
+                    }
+    for index in essential_tweet_data:
+        user_dict[tweet[1]][index] += essential_tweet_data[index]
+user_MASSIVE_ONE = pd.DataFrame.from_dict(user_dict,orient="index")
+
+#%%
+user_MASSIVE_ONE["langs"]
+
+#%%
 ##############################################################################################
 ##############################################################################################
 
@@ -264,7 +294,6 @@ df_ru_uk["en_text"] = en_text
 ##############################################################################################
 ##############################################################################################
 #%%
-df_ru_uk.to_pickle("./dfs/translated-text-ru-uk.pkl")
 #%%
 
 #%%
@@ -312,10 +341,11 @@ def get_president_data(dataframe):
 
 president_to_df_list = get_president_data(df_ru_uk)
 
-# df_uk_ru["president_mentioned"] = president_to_df_list
+df_ru_uk["president_mentioned"] = president_to_df_list
 
 
 #%%
+df_ru_uk.to_pickle("./dfs/translated-text-ru-uk.pkl")
 
 
 #%%
@@ -339,7 +369,7 @@ len(tweeted_putin_id_list), len(tweeted_zelen_id_list)
 
 
 #%%
-df_uk_ru = pd.read_pickle("df_uk_ru_presidents.pkl")
+# df_uk_ru = pd.read_pickle("df_uk_ru_presidents.pkl")
 
 #%%
 ## Sentiment
@@ -363,7 +393,8 @@ df_uk_ru = pd.read_pickle("df_uk_ru_presidents.pkl")
 ##############################################################################################
 ##############################################################################################
 translated_text_ru_uk_sentiment = pd.read_pickle("./dfs/translated-text-ru-uk_sentiment.pkl")
-
+#%%
+# translated_text_ru_uk_sentiment
 #%%
 ### MAKE USER DATAFRAME
 # save_path_dates = code_path.joinpath('./../data/dataframes_dates')
@@ -391,7 +422,7 @@ def make_user_df(old_df_name):
             user_dict[tweet[2]][index] += essential_tweet_data[index]
     new_df_name = pd.DataFrame.from_dict(user_dict,orient="index")
     return new_df_name
-    new_df_name.to_pickle(save_location)
+
 user_tt_ru_uk_s = make_user_df(translated_text_ru_uk_sentiment)
 user_tt_ru_uk_s.to_pickle("./dfs/user_trans_senti_ru_uk.pkl")
 
@@ -409,32 +440,39 @@ user_tt_ru_uk_s
 
 ### SAVE FILES
 
-#%%
-user_df.to_pickle("user_df.pkl")
-#%%
-THE_GREAT_DF.to_pickle("THE_GREAT_DF.pkl")
-#%%
-THE_GREAT_DF = pd.read_pickle("THE_GREAT_DF.pkl")
-#%%
-THE_GREAT_DF
-#%%
+# #%%
+# user_df.to_pickle("user_df.pkl")
+# #%%
+# THE_GREAT_DF.to_pickle("THE_GREAT_DF.pkl")
+# #%%
+# THE_GREAT_DF = pd.read_pickle("./dfs/THE_GREAT_DF.pkl")
+# #%%
+# THE_GREAT_DF.loc["1497841013703987200"]
+# #%%
 
 
 
 
-#%%
-df_ru_uk_n = pd.read_pickle("./dfs/translated-text-ru-uk.pkl")
-df_ru_uk_n
+# #%%
+# df_ru_uk_n = pd.read_pickle("./dfs/translated-text-ru-uk.pkl")
+# df_ru_uk_n
 
-#%%
-# df_ru_uk_n = df_ru_uk_n.set_index("tweet_id")
-df_ru_uk_n["parent_id"] = 0
-#%%
-col_i = df_ru_uk_n.columns.get_loc("parent_id")
-for i,idx in enumerate(df_ru_uk_n.index):
-    # THE_GREAT_DF.loc[tweet_id]
-    df_ru_uk_n.iloc[i, col_i] = THE_GREAT_DF.iloc[idx]["parent_id"]
-    print(i)
+# #%%
+# # df_ru_uk_n = df_ru_uk_n.set_index("tweet_id")
+# df_ru_uk_n["parent_id"] = 0
+# #%%
+# col_i = df_ru_uk_n.columns.get_loc("parent_id")
+# for i,idx in enumerate(df_ru_uk_n.index):
+#     # THE_GREAT_DF.loc[tweet_id]
+#     df_ru_uk_n.iloc[i, col_i] = THE_GREAT_DF.iloc[idx]["parent_id"]
+#     print(i)
 
-#%%
-df_ru_uk_n.to_pickle("./dfs/translated-text-ru-uk.pkl")
+# #%%
+# df_ru_uk_n.to_pickle("./dfs/translated-text-ru-uk.pkl")
+
+
+# #%%
+# df0227 = pd.read_pickle("./../data/dataframes_dates/02-27.pkl")
+
+# #%%
+# df0227.loc["1497841013703987200"]
