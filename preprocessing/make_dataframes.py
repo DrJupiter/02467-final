@@ -208,6 +208,15 @@ THE_GREAT_DF = pd.concat(MASSIVE_LIST)
 THE_GREAT_DF.to_pickle(f"THE_ONE_DF.pkl")
 
 #%%
+##############################################################################################
+##############################################################################################
+THE_GREAT_DF = pd.read_pickle("./THE_ONE_DF.pkl")
+
+#%%
+## Use the ONE GREAT DF to find all tweets tweeted by a person we has tweeted in either ussian or ukranian
+
+THE_GREAT_DF["iloc"] = np.arange(len(THE_GREAT_DF.index))
+#%%
 
 user_dict = defaultdict(lambda : defaultdict(list))
 
@@ -222,6 +231,7 @@ for i,tweet in enumerate(THE_GREAT_DF.values):
                     "hashtags":[tweet[7]],
                     "topics":[tweet[8]], 
                     "mentions":[tweet[9]],
+                    "iloc_value": [tweet[10]]
                     # "en_text":[tweet[11]],
                     # "overall_sentiement":[tweet[12]],
                     # "president": [tweet[13]],
@@ -230,10 +240,46 @@ for i,tweet in enumerate(THE_GREAT_DF.values):
     for index in essential_tweet_data:
         user_dict[tweet[1]][index] += essential_tweet_data[index]
 user_MASSIVE_ONE = pd.DataFrame.from_dict(user_dict,orient="index")
+#%%
+
+THE_GREAT_DF["nationality"] = "unknown"
 
 #%%
-user_MASSIVE_ONE["langs"]
 
+def common_member(a, b):
+    a_set = set(a)
+    b_set = set(b)
+    if (a_set & b_set):
+        return True 
+    else:
+        return False
+#%%
+ru_uk_idxs = []
+for i,(langs,ilocs) in enumerate(zip(user_MASSIVE_ONE["langs"],user_MASSIVE_ONE["iloc_value"])):
+    
+    if "uk" in langs:
+        for iloc_ in ilocs:
+            THE_GREAT_DF.iloc[iloc_,11] = "uk" 
+            ru_uk_idxs.append(iloc_)
+    
+    if "ru" in langs:
+        for iloc_ in ilocs:
+            THE_GREAT_DF.iloc[iloc_,11] = "ru" 
+            ru_uk_idxs.append(iloc_)
+
+#%%
+# len(set(ru_uk_idxs))
+#%%
+
+df_ru_uk = THE_GREAT_DF[np.logical_or(THE_GREAT_DF["nationality"] == "uk",THE_GREAT_DF["nationality"] == "ru")]
+
+#%%
+
+df_ru_uk = df_ru_uk.set_index("tweet_id")
+df_ru_uk.to_pickle("./dfs/df_ru_uk_n.pkl")
+
+#%%
+df_ru_uk
 #%%
 ##############################################################################################
 ##############################################################################################
@@ -258,7 +304,8 @@ emo = emoji_trans(exact_match_only=False, randomize=True)
 ## Translate to english and translate emojis
 
 # df_ru_uk = pd.read_pickle("only_ru_uk_data.pkl")
-df_ru_uk = pd.read_pickle("./dfs/translated-text-ru-uk.pkl")
+# df_ru_uk = pd.read_pickle("./dfs/translated-text-ru-uk.pkl")
+df_ru_uk = pd.read_pickle("./dfs/df_ru_uk_n.pkl")
 
 re_web_finder = r"(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+"
 
@@ -271,8 +318,12 @@ for i,(txt,lang) in enumerate(zip(df_ru_uk["text"],df_ru_uk["lang"])):
 
     try:
         if lang != "en":
+            if lang == "uk":
+                src_lang = "ukrainian"
+            elif lang == "ru":
+                src_lang = "russian"
             txt_no_emos = emo.demojify(txt)
-            txt_trans = translator.translate(txt_no_emos).text
+            txt_trans = translator.translate(txt_no_emos,src=src_lang).text
             txt_trans = word_tokenize(txt_trans)
             txt_final = " ".join(map(str,txt_trans)).lower()
             en_text.append(txt_final) 
@@ -294,18 +345,13 @@ df_ru_uk["en_text"] = en_text
 ##############################################################################################
 ##############################################################################################
 #%%
+df_ru_uk.to_pickle("./dfs/df_ru_uk_n_trans.pkl")
 #%%
-
+###################### RUN SENTIMENT WINDOW PART ######################
+#%%
+translated_text_ru_uk_sentiment = pd.read_pickle("./dfs/translated-text-ru-uk_sentiment_n.pkl")
 #%%
 #### Look at who talks about putin and zelensky
-
-def common_member(a, b):
-    a_set = set(a)
-    b_set = set(b)
-    if (a_set & b_set):
-        return True 
-    else:
-        return False
 
 putin_words = ["Putin","Vladimir Putin", "putin","vladimir putin"] # dublicate words should be removed when the data is gernereated again, as all will be lower then
 zelen_words = ["Volodymyr","Volodymyr Zelenskyy","Zelenskyy","volodymyr zelenskyy","volodymyr","zelenskyy","ZelenskyyUa","Volodymyr Zelensky","Zelensky","zelensky","zelenskyyua"]
@@ -314,16 +360,16 @@ re_quote = r"\'(.*?)\'"
 
 def get_president_data(dataframe):
     p,z = 0,0
-    topics = list(dataframe["topics"])
-    hastags = list(dataframe["hashtags"])
-    print(type(topics[2]))
+    topics = dataframe["topics"]
+    hastags = dataframe["hashtags"]
+    print((dataframe["topics"]))
     
     president_list = []
     
     for i in range(len(topics)):
         # print(topics[i],hastags[i],type(topics[i]),type(hastags[i]))
-        tweet_topics = re.findall(re_quote,topics[i]+hastags[i])
-
+        tweet_topics = topics[i]+hastags[i] #re.findall(re_quote,topics[i]+hastags[i])
+        print(tweet_topics)
         tweet_president_list = []
         # print(tweet_topics)
         if common_member(tweet_topics,putin_words):
@@ -339,11 +385,10 @@ def get_president_data(dataframe):
     print(p,z)
     return president_list
 
-president_to_df_list = get_president_data(df_ru_uk)
+president_to_df_list = get_president_data(translated_text_ru_uk_sentiment)
 
-df_ru_uk["president_mentioned"] = president_to_df_list
-
-
+# translated_text_ru_uk_sentiment["president_mentioned"] = president_to_df_list
+#%%
 #%%
 df_ru_uk.to_pickle("./dfs/translated-text-ru-uk.pkl")
 
@@ -374,27 +419,28 @@ len(tweeted_putin_id_list), len(tweeted_zelen_id_list)
 #%%
 ## Sentiment
 
-# sentiment_list = []
-# for i,tweet_txt in enumerate(df_uk_ru["en_text"]):
-#     if tweet_txt is not None:
-#         compound_sentiment = analyzer.polarity_scores(tweet_txt)
-#         sentiment_list.append(compound_sentiment)
-#     else:
-#         sentiment_list.append(None)
+sentiment_list = []
+for i,tweet_txt in enumerate(translated_text_ru_uk_sentiment["en_text"]):
+    if tweet_txt is not None:
+        compound_sentiment = analyzer.polarity_scores(tweet_txt)
+        sentiment_list.append(compound_sentiment)
+    else:
+        sentiment_list.append(None)
 
-# df_uk_ru["sentiment_scores"] = sentiment_list
+translated_text_ru_uk_sentiment["sentiment_scores"] = sentiment_list
 
 
 #%%
-
+translated_text_ru_uk_sentiment
 
 #%%
 
 ##############################################################################################
 ##############################################################################################
-translated_text_ru_uk_sentiment = pd.read_pickle("./dfs/translated-text-ru-uk_sentiment.pkl")
 #%%
-# translated_text_ru_uk_sentiment
+translated_text_ru_uk_sentiment.to_pickle("./dfs/translated-text-ru-uk.pkl")
+#%%
+
 #%%
 ### MAKE USER DATAFRAME
 # save_path_dates = code_path.joinpath('./../data/dataframes_dates')
@@ -402,24 +448,26 @@ translated_text_ru_uk_sentiment = pd.read_pickle("./dfs/translated-text-ru-uk_se
 def make_user_df(old_df_name):
     user_dict = defaultdict(lambda : defaultdict(list))
 
-    for i,tweet in enumerate(old_df_name.values):
+    for i, (idx,tweet) in enumerate(zip(old_df_name.index,old_df_name.values)):
         essential_tweet_data = {
-                        "tweet_ids": [tweet[1]],
-                        "parent_ids": [tweet[3]],
-                        "langs":[tweet[4]],
-                        "texts":[tweet[5]],
-                        "tweet_types":[tweet[6]],
-                        "created_times":[tweet[7]],
-                        "hashtags":[tweet[8]],
-                        "topics":[tweet[9]], 
-                        "mentions":[tweet[10]],
+                        "tweet_ids": [idx],
+                        "parent_ids": [tweet[1]],
+                        "langs":[tweet[2]],
+                        "texts":[tweet[3]],
+                        "tweet_types":[tweet[4]],
+                        "created_times":[tweet[5]],
+                        "hashtags":[tweet[6]],
+                        "topics":[tweet[7]], 
+                        "mentions":[tweet[8]],
+                        "iloc": [tweet[9]],
+                        "nationality": [tweet[10]],
                         "en_text":[tweet[11]],
-                        "overall_sentiement":[tweet[12]],
+                        "overall_sentiement":[tweet[14]],
                         "president": [tweet[13]],
-                        "word_wise_sentiement":[tweet[14]],
+                        "word_wise_sentiement":[tweet[12]],
                         }
         for index in essential_tweet_data:
-            user_dict[tweet[2]][index] += essential_tweet_data[index]
+            user_dict[tweet[0]][index] += essential_tweet_data[index]
     new_df_name = pd.DataFrame.from_dict(user_dict,orient="index")
     return new_df_name
 
@@ -476,3 +524,8 @@ user_tt_ru_uk_s
 
 # #%%
 # df0227.loc["1497841013703987200"]
+
+
+#%%
+
+#%%

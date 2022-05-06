@@ -7,7 +7,7 @@ from nltk.text import Text
 from nltk.tokenize import word_tokenize
 
 s_analyzer = SentimentIntensityAnalyzer()
-df_uk_ru = pd.read_pickle("./dfs/translated-text-ru-uk.pkl")
+df_uk_ru_n = pd.read_pickle("./dfs/df_ru_uk_n_trans.pkl")
 
 
 #%%
@@ -23,7 +23,7 @@ def window_sentiment(txt,word,window_size):
         sentiment_list.append(s_analyzer.polarity_scores(txt))
     return sentiment_list
 
-txtt = df_uk_ru.iloc[0]["en_text"] + ' ' + 'ukraine love'
+txtt = df_uk_ru_n.iloc[0]["en_text"] + ' ' + 'ukraine love'
 
 window_sentiment(txtt,"ukraine",5)
 #%%
@@ -39,7 +39,7 @@ def equalize_sentiment(sentiment_list,keys=keys):
 
     return d
 
-txtt = df_uk_ru.iloc[0]["en_text"] + ' ' + 'ukraine love'
+txtt = df_uk_ru_n.iloc[0]["en_text"] + ' ' + 'ukraine love'
 sentiment_list = window_sentiment(txtt,"ukraine",5)
 equalize_sentiment(sentiment_list, keys = keys)
 
@@ -61,20 +61,20 @@ def sentiment_dict_from_txt(txt,search_words = search_words):
     del topic_d["zelensky"]
     return topic_d
 
-txtt = df_uk_ru.iloc[0]["en_text"] + ' ' + 'ukraine'+ "zelensky fat bad" + "zelenskyy good nice"
+txtt = df_uk_ru_n.iloc[0]["en_text"] + ' ' + 'ukraine'+ "zelensky fat bad" + "zelenskyy good nice"
 sentiment_dict_from_txt(txtt,search_words = search_words)
 
 #%%
 
 wordwise_sentiment_list = []
-for i,en_text in enumerate(df_uk_ru["en_text"]):
+for i,en_text in enumerate(df_uk_ru_n["en_text"]):
     if en_text is not None:
         sent_d = sentiment_dict_from_txt(en_text)
         wordwise_sentiment_list.append(sent_d)
     else:
         wordwise_sentiment_list.append(None)
 
-df_uk_ru["sentiment_dict"] = wordwise_sentiment_list
+df_uk_ru_n["sentiment_dict"] = wordwise_sentiment_list
 
 #%%
-df_uk_ru.to_pickle("./dfs/translated-text-ru-uk_sentiment.pkl")
+df_uk_ru_n.to_pickle("./dfs/translated-text-ru-uk_sentiment_n.pkl")
