@@ -6,7 +6,7 @@ import os
 import json
 import pandas as pd
 import pickle
-
+import re
 from collections import defaultdict
 
 
@@ -18,9 +18,6 @@ from pathlib import Path
 #code_path = Path(*Path(os.path.realpath(sys.argv[0])).parts[:-1])
 code_path = Path(os.getcwd())
 
-## %%
-
-
 path = code_path.joinpath('./../data/hydrated')
 save_path = code_path.joinpath('./../data/dataframes')
 
@@ -28,17 +25,8 @@ save_path = code_path.joinpath('./../data/dataframes')
 #dirs = [os.path.join(path,d) for d in os.listdir(path) if os.path.isdir(os.path.join(path,d))]
 files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))] 
 
-
-## %%
-# files.sort(key = lambda x: x[:10])
-# files
-## %%
-import re
-
-hashtags_re = r"#[^#\s.,;:'`]+"
-hashtags_re = re.compile(hashtags_re)
-#for te in test_string:
-#    print(hashtags.findall(y,te))
+# hashtags_re = r"#[^#\s.,;:'`]+"
+# hashtags_re = re.compile(hashtags_re)
 
 #%%
 
@@ -170,6 +158,9 @@ for file in files:
 
 #%%
 
+##############################################################################################
+##############################################################################################
+
 ### Create df's by date
 
 # Concat by date and save to data/dataframes_dates
@@ -179,7 +170,6 @@ dataframes_files = [f for f in os.listdir(save_path) if os.path.isfile(os.path.j
 start_date = 0
 for i,dataframe in enumerate(dataframes_files):
     if dataframe[-11:-6] != start_date:
-        print(dataframe[-11:-6],start_date, dataframe[-11:-6] != start_date)
         if i > 0:
             df = pd.concat(df_list)
             df.to_pickle(f"{save_path_dates}/{start_date}.pkl")
@@ -193,64 +183,15 @@ for i,dataframe in enumerate(dataframes_files):
 df = pd.concat(df_list)
 df.to_pickle(f"{save_path_dates}/{start_date}.pkl")
 
-
-
-
 #%%
 
 ##############################################################################################
 ##############################################################################################
-
-#%%
-
-#### Look at who talks about putin and zelensky
-
-def common_member(a, b):
-    a_set = set(a)
-    b_set = set(b)
-    if (a_set & b_set):
-        return True 
-    else:
-        return False
-
-putin_words = ["Putin","Vladimir Putin", "putin","vladimir putin"] # dublicate words should be removed when the data is gernereated again, as all will be lower then
-zelen_words = ["Volodymyr","Volodymyr Zelenskyy","Zelenskyy","volodymyr zelenskyy","volodymyr","zelenskyy","ZelenskyyUa","Volodymyr Zelensky","Zelensky","zelensky"]
-
-def get_president_data(dataframe):
-    
-    topics = dataframe["topics"] + dataframe["hashtags"]
-
-    putin_list, zelensky_list = [], []
-    
-    for tweet_topics in topics:        
-
-        if common_member(tweet_topics,putin_words):
-            putin_list.append(dataframe["tweet_id"])
-
-        if common_member(tweet_topics,zelen_words):
-            zelensky_list.append(dataframe["tweet_id"])
-
-    return putin_list, zelensky_list
-
-l1, l2 = get_president_data(df)
-len(l1), len(l2)
-
-#%%
-
-dataframes_files_dates = [f for f in os.listdir(save_path_dates) if os.path.isfile(os.path.join(save_path_dates,f))] 
-
-tweeted_putin_id_list, tweeted_zelen_id_list = [], []
-for df_name in dataframes_files_dates:
-    df = pd.read_pickle(f"{save_path_dates}/{df_name}")
-    putin_list, zelen_list = get_president_data(df)  
-    tweeted_putin_id_list += putin_list
-    tweeted_zelen_id_list += zelen_list
-
-len(tweeted_putin_id_list), len(tweeted_zelen_id_list)
 
 #%%
 
 ## Create the one true DF
+dataframes_files_dates = [f for f in os.listdir(save_path_dates) if os.path.isfile(os.path.join(save_path_dates,f))] 
 
 MASSIVE_LIST = []
 for df_name in dataframes_files_dates:
@@ -260,16 +201,6 @@ for df_name in dataframes_files_dates:
 THE_GREAT_DF = pd.concat(MASSIVE_LIST)
 # THE_GREAT_DF.to_pickle(f"THE_ONE_DF.pkl")
 
-#%%
-
-## Lang counter
-
-en_counter = 0
-for lang in THE_GREAT_DF["lang"]:
-    if lang == "en":
-        en_counter += 1
-
-en_counter/len(THE_GREAT_DF)
 
 #%%
 
@@ -277,26 +208,6 @@ en_counter/len(THE_GREAT_DF)
 ##############################################################################################
 ##############################################################################################
 
-
-
-
-#%%
-### MAKE USER DATAFRAME
-save_path_dates = code_path.joinpath('./../data/dataframes_dates')
-dataframes_files_dates = [f for f in os.listdir(save_path_dates) if os.path.isfile(os.path.join(save_path_dates,f))] 
-
-
-
-
-
-
-
-#%%
-##############################################################################################
-##############################################################################################
-##############################################################################################
-
-#%%
 
 ## Get packages needed for translation and sentiment
 
@@ -306,40 +217,20 @@ from googletrans import Translator
 from emoji_translate.emoji_translate import Translator as emoji_trans
 from nltk.tokenize import word_tokenize
 
-#from time import perf_counter
+from time import perf_counter
 
 translator = Translator()
 
 analyzer = SentimentIntensityAnalyzer()
 emo = emoji_trans(exact_match_only=False, randomize=True)
 
-
 #%%
-start = perf_counter()
-non_en = []
-for i, lang in enumerate(THE_GREAT_DF["lang"]):
-    if lang != "en":
-        non_en.append(i)
-
-print(perf_counter()-start)
-
-
-#%%
-
-dfs = [pd.read_pickle(f"{save_path_dates}/{df_name}") for df_name in dataframes_files_dates]
-#%%
-lang_df = pd.read_csv("lang_proxy.csv")
-df_ru_uk = lang_df[np.logical_or(lang_df["lang"]=="ru",lang_df["lang"]=="uk")]
-len(df_ru_uk)
-#%%
-
 ## Translate to english and translate emojis
 
-df_ru_uk = pd.read_pickle("only_ru_uk_data.pkl")
+# df_ru_uk = pd.read_pickle("only_ru_uk_data.pkl")
+df_ru_uk = pd.read_pickle("./dfs/translated-text-ru-uk.pkl")
 
 re_web_finder = r"(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+"
-
-# start_time = perf_counter()
 
 df_ru_uk["en_text"] = "not_assigned"
 en_text = []
@@ -347,66 +238,37 @@ for i,(txt,lang) in enumerate(zip(df_ru_uk["text"],df_ru_uk["lang"])):
 
     for r in re.findall(re_web_finder,txt):
         txt = txt.replace(r,".")
+
     try:
         if lang != "en":
             txt_no_emos = emo.demojify(txt)
             txt_trans = translator.translate(txt_no_emos).text
-            txt_trans = word_tokenize.split(txt_trans)
+            txt_trans = word_tokenize(txt_trans)
             txt_final = " ".join(map(str,txt_trans)).lower()
             en_text.append(txt_final) 
 
         else:
             txt_no_emos = emo.demojify(txt)
-            txt_trans = word_tokenize.split(txt_no_emos)
+            txt_trans = word_tokenize(txt_no_emos)
             txt_final = " ".join(map(str,txt_trans)).lower()
             en_text.append(txt_final) 
     except:
         en_text.append(None)
 
-
     print(i/180,"%")
-    # if i % 100 == 0 and i > 0:
+    # if i == 100:
     #     break
 
-
-# print(perf_counter()-start_time)
-
-#%%
 df_ru_uk["en_text"] = en_text
-# # %%
-# NN = int(N/100)
-# for i in range(NN):
-#     # print(i % int(NN/10))
-#     if i % int(NN/10) == 0:
-#         print(True,i)
+
+##############################################################################################
+##############################################################################################
+#%%
+df_ru_uk.to_pickle("./dfs/translated-text-ru-uk.pkl")
 #%%
 
-
 #%%
-df_uk_ru = pd.read_pickle("only_ru_uk_data.pkl")
-
-#%%
-df_uk_ru
-
-#%%
-## Sentiment
-
-## DO window sentiement omklring relevante ord (Russia, ukraine, Putin, Zelenskyy)
-
-sentiment_list = []
-for i,tweet_txt in enumerate(df_uk_ru["en_text"]):
-    if tweet_txt is not None:
-        compound_sentiment = analyzer.polarity_scores(tweet_txt)
-        sentiment_list.append(compound_sentiment)
-    else:
-        sentiment_list.append(None)
-
-df_uk_ru["sentiment_scores"] = sentiment_list
-
-
-#%%
-
-# Add which president are spoken of:
+#### Look at who talks about putin and zelensky
 
 def common_member(a, b):
     a_set = set(a)
@@ -448,63 +310,97 @@ def get_president_data(dataframe):
     print(p,z)
     return president_list
 
-president_to_df_list = get_president_data(df_uk_ru)
+president_to_df_list = get_president_data(df_ru_uk)
 
-df_uk_ru["president_mentioned"] = president_to_df_list
-#%%
-# for txt in df_uk_ru["en_text"][0:10]:
-#     print("--",txt)
-# df_uk_ru
-
-
-# df_uk_ru_president = df_uk_ru[df_uk_ru["president_mentioned"]!=[]]
-# df_uk_ru["president_mentioned"]!=[]
-
-idxs = []
-for i,president_list in enumerate(df_uk_ru["president_mentioned"]):
-    if president_list != []:
-        idxs.append(i)
-#%%
-df_uk_ru_presidents = df_uk_ru.iloc[idxs]
-df_uk_ru_presidents.to_pickle("df_uk_ru_presidents.pkl")
-
-#%%
-df_uk_ru.to_pickle("only_ru_uk_data.pkl")
-
-
+# df_uk_ru["president_mentioned"] = president_to_df_list
 
 
 #%%
 
-user_dict = defaultdict(lambda : defaultdict(list))
-
-
-for i,tweet in enumerate(df_uk_ru.values):
-    essential_tweet_data = {
-                    "tweet_ids": [tweet[1]],
-                    "parent_ids": [tweet[2]],
-                    "langs":[tweet[4]],
-                    "texts":[tweet[5]],
-                    "tweet_types":[tweet[6]],
-                    "created_times":[tweet[7]],
-                    "hashtags":[tweet[8]],
-                    "topics":[tweet[9]], 
-                    "mentions":[tweet[10]],
-                    "en_text":[tweet[11]],
-                    "sentiement":[tweet[12]],
-                    }
-    for index in essential_tweet_data:
-        user_dict[tweet[2]][index] += essential_tweet_data[index]
-
-
-#%%
-user_df = pd.DataFrame.from_dict(user_dict,orient="index")
 
 #%%
 
-user_df.iloc[0]["sentiement"]
+dataframes_files_dates = [f for f in os.listdir(save_path_dates) if os.path.isfile(os.path.join(save_path_dates,f))] 
+
+tweeted_putin_id_list, tweeted_zelen_id_list = [], []
+for df_name in dataframes_files_dates:
+    df = pd.read_pickle(f"{save_path_dates}/{df_name}")
+    putin_list, zelen_list = get_president_data(df)  
+    tweeted_putin_id_list += putin_list
+    tweeted_zelen_id_list += zelen_list
+
+len(tweeted_putin_id_list), len(tweeted_zelen_id_list)
 
 
+
+#%%
+##############################################################################################
+##############################################################################################
+
+
+#%%
+df_uk_ru = pd.read_pickle("df_uk_ru_presidents.pkl")
+
+#%%
+## Sentiment
+
+# sentiment_list = []
+# for i,tweet_txt in enumerate(df_uk_ru["en_text"]):
+#     if tweet_txt is not None:
+#         compound_sentiment = analyzer.polarity_scores(tweet_txt)
+#         sentiment_list.append(compound_sentiment)
+#     else:
+#         sentiment_list.append(None)
+
+# df_uk_ru["sentiment_scores"] = sentiment_list
+
+
+#%%
+
+
+#%%
+
+##############################################################################################
+##############################################################################################
+translated_text_ru_uk_sentiment = pd.read_pickle("./dfs/translated-text-ru-uk_sentiment.pkl")
+
+#%%
+### MAKE USER DATAFRAME
+# save_path_dates = code_path.joinpath('./../data/dataframes_dates')
+# dataframes_files_dates = [f for f in os.listdir(save_path_dates) if os.path.isfile(os.path.join(save_path_dates,f))] 
+def make_user_df(old_df_name):
+    user_dict = defaultdict(lambda : defaultdict(list))
+
+    for i,tweet in enumerate(old_df_name.values):
+        essential_tweet_data = {
+                        "tweet_ids": [tweet[1]],
+                        "parent_ids": [tweet[3]],
+                        "langs":[tweet[4]],
+                        "texts":[tweet[5]],
+                        "tweet_types":[tweet[6]],
+                        "created_times":[tweet[7]],
+                        "hashtags":[tweet[8]],
+                        "topics":[tweet[9]], 
+                        "mentions":[tweet[10]],
+                        "en_text":[tweet[11]],
+                        "overall_sentiement":[tweet[12]],
+                        "president": [tweet[13]],
+                        "word_wise_sentiement":[tweet[14]],
+                        }
+        for index in essential_tweet_data:
+            user_dict[tweet[2]][index] += essential_tweet_data[index]
+    new_df_name = pd.DataFrame.from_dict(user_dict,orient="index")
+    return new_df_name
+    new_df_name.to_pickle(save_location)
+user_tt_ru_uk_s = make_user_df(translated_text_ru_uk_sentiment)
+user_tt_ru_uk_s.to_pickle("./dfs/user_trans_senti_ru_uk.pkl")
+
+
+##############################################################################################
+##############################################################################################
+
+#%%
+user_tt_ru_uk_s
 
 #%%
 
@@ -520,5 +416,25 @@ THE_GREAT_DF.to_pickle("THE_GREAT_DF.pkl")
 #%%
 THE_GREAT_DF = pd.read_pickle("THE_GREAT_DF.pkl")
 #%%
+THE_GREAT_DF
+#%%
+
+
+
 
 #%%
+df_ru_uk_n = pd.read_pickle("./dfs/translated-text-ru-uk.pkl")
+df_ru_uk_n
+
+#%%
+# df_ru_uk_n = df_ru_uk_n.set_index("tweet_id")
+df_ru_uk_n["parent_id"] = 0
+#%%
+col_i = df_ru_uk_n.columns.get_loc("parent_id")
+for i,idx in enumerate(df_ru_uk_n.index):
+    # THE_GREAT_DF.loc[tweet_id]
+    df_ru_uk_n.iloc[i, col_i] = THE_GREAT_DF.iloc[idx]["parent_id"]
+    print(i)
+
+#%%
+df_ru_uk_n.to_pickle("./dfs/translated-text-ru-uk.pkl")

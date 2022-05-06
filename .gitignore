@@ -140,3 +140,4 @@ preprocessing/only_ru_uk_data
 preprocessing/THE_GREAT_DF.pkl
 preprocessing/only_ru_uk_data.pkl
 preprocessing/df_uk_ru_presidents.pkl
+*.pkl
