@@ -195,34 +195,3 @@ nw.visualize(dG)
 
 
 #%%
-from googletrans import Translator
-translator = Translator()
-
-txt ="Согласен, и ещё лучше чем БМ-13 «Катюша»! Только не понял к чему это))"
-
-translator.translate(txt).text
-
-#%%
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-import pandas as pd
-from googletrans import Translator
-from emoji_translate.emoji_translate import Translator as emoji_trans
-from nltk.tokenize import word_tokenize
-
-from time import perf_counter
-
-translator = Translator()
-
-analyzer = SentimentIntensityAnalyzer()
-emo = emoji_trans(exact_match_only=False, randomize=True)
-
-#%%
-re_web_finder = r"(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+"
-for r in re.findall(re_web_finder,txt):
-        txt = txt.replace(r,".")
-#%%
-txt_no_emos = emo.demojify(txt)
-txt_trans = translator.translate(txt_no_emos).text
-txt_trans = word_tokenize(txt_trans)
-txt_final = " ".join(map(str,txt_trans)).lower()
-txt_final 
