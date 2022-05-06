@@ -246,13 +246,7 @@ THE_GREAT_DF["nationality"] = "unknown"
 
 #%%
 
-def common_member(a, b):
-    a_set = set(a)
-    b_set = set(b)
-    if (a_set & b_set):
-        return True 
-    else:
-        return False
+
 #%%
 ru_uk_idxs = []
 for i,(langs,ilocs) in enumerate(zip(user_MASSIVE_ONE["langs"],user_MASSIVE_ONE["iloc_value"])):
