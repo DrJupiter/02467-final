@@ -23,18 +23,20 @@ def setup_plot():
 
 
 
-setup_plot()
 # %%
 
+if __name__ == "__main__":
+
+    setup_plot()
 #SEE available fonts
-import matplotlib.font_manager
-from IPython.core.display import HTML
+    import matplotlib.font_manager
+    from IPython.core.display import HTML
 
-def make_html(fontname):
-    return "<p>{font}: <span style='font-family:{font}; font-size: 24px;'>{font}</p>".format(font=fontname)
+    def make_html(fontname):
+        return "<p>{font}: <span style='font-family:{font}; font-size: 24px;'>{font}</p>".format(font=fontname)
 
-code = "\n".join([make_html(font) for font in sorted(set([f.name for f in matplotlib.font_manager.fontManager.ttflist]))])
+    code = "\n".join([make_html(font) for font in sorted(set([f.name for f in matplotlib.font_manager.fontManager.ttflist]))])
 
 
-HTML("<div style='column-count: 2;'>{}</div>".format(code))
+    HTML("<div style='column-count: 2;'>{}</div>".format(code))
 # %%
